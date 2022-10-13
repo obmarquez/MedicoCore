@@ -1,0 +1,290 @@
+﻿
+@{
+    ViewData["Title"] = "Poa";
+}
+
+@using (Html.BeginForm("Poa", "Consultas"))
+{
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            POA. <small>Entrega Custodia - Finalizados</small>
+        </div>
+        <div class="panel-body">
+
+            <div class="row form-group">
+
+                <div class="col-md-3">
+                    @Html.DropDownList("mes", (IEnumerable<SelectListItem>)ViewBag.losMeses, "Seleccione un mes", new { @class = "form-control" })
+                </div>
+
+                <div class="col-md-3">
+                    <input type="number" id="anio" name="anio" class="form-control" placeholder="Indique un año" />
+                </div>
+
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary">Buscar</button>
+                </div>
+
+            </div>
+
+            @*<div class="form-group">
+                <button type="submit" class="btn btn-primary">Buscar</button>
+            </div>*@
+        </div>
+    </div>
+}
+
+@if (@ViewBag.elMes != 0)
+{
+    <div class="wrapper wrapper-content">
+        <div class="row">
+
+            <div class="col-lg-6">
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <span class="label label-success pull-right">Mensual</span>
+                        <h5>Total</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <h1 class="no-margins">@ViewBag.TotalEntregadoCustodia.Total</h1>
+                        <div class="stat-percent font-bold text-success"><i class="fa fa-bolt"></i></div>
+                        <small>Total expedientes entregados a Custodia</small>
+                    </div>
+
+                    <div class="ibox-content">
+                        <figure class="highcharts-figure">
+                            <div id="container_b"></div>
+                        </figure>
+                    </div>
+
+                    <div class="ibox-content">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered table-hover dataTables-example">
+                                <thead>
+                                <th>Dependencia</th>
+                                <th>Total</th>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item4 in @ViewBag.EntregaCustodiaDetalle)
+                                    {
+                                        <tr>
+                                            <td>@item4.Dependencia</td>
+                                            <td>@item4.Total</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+
+                <div class="ibox float-e-margins">
+                    <div class="ibox-title">
+                        <span class="label label-info pull-right">Mensual</span>
+                        <h5>Total</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <h1 class="no-margins">@ViewBag.TotalFinalizados.Total</h1>
+                        <div class="stat-percent font-bold text-info"><i class="fa fa-level-up"></i></div>
+                        <small>Total expedientes finalizados</small>
+                    </div>
+
+                    <div class="ibox-content">
+                        <figure class="highcharts-figure">
+                            <div id="container"></div>
+                        </figure>
+                    </div>
+
+                    <div class="ibox-content">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered table-hover dataTables-example">
+                                <thead>
+                                    <tr>
+                                        <th>Dependencia</th>
+                                        <th>Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item5 in @ViewBag.FinalizadoDetalle)
+                                    {
+                                        <tr>
+                                            <td>@item5.Dependencia</td>
+                                            <td>@item5.Total</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+
+
+    @section scripts
+    {
+        <script src="~/Content/js/plugins/chartJs/Chart.min.js"></script>
+        <script src="~/scriptsHighcharts/highcharts.min.js"></script>
+        <script src="~/scriptsHighcharts/drilldown.min.js"></script>
+        <script src="~/scriptsHighcharts/exporting.min.js"></script>
+        <script src="~/scriptsHighcharts/export-data.min.js"></script>
+        <script src="~/scriptsHighcharts/data.min.js"></script>
+        <script src="~/scriptsHighcharts/accessibility.min.js"></script>
+
+        @*-- js --*@
+        <script src="~/js/plugins/dataTables/datatables.min.js"></script>
+
+        <script type="text/javascript">
+
+            $(document).ready(function () {
+
+                $('.dataTables-example').DataTable({
+                    pageLength: 50,
+                    responsive: true,
+                    dom: '<"html5buttons"B>lTfgitp',
+                    buttons: [
+                        { extend: 'copy' },
+                        { extend: 'excel', title: 'EntregaCustodia' }
+                    ]
+
+                });
+            });
+
+            //-----------------------------------------------------------------------------------------------------Array para entrega custodia
+            var myArray_b = [];
+            var tri = [];
+
+            @foreach (var item3 in @ViewBag.EntregaCustodiaGenero)
+            {
+
+                @:tri = ["@item3.Genero",parseFloat(@item3.Total), "@item3.Genero" ];
+                @:myArray_b.push(tri);
+
+            }
+
+            Highcharts.chart('container_b', {
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: 'Expediente a Custodia'
+                },
+                subtitle: {
+                    text: 'Total de expedientes entregados a Custodia'
+                },
+                accessibility: {
+                    announceNewData: {
+                        enabled: true
+                    }
+                },
+                xAxis: {
+                    type: 'category'
+                },
+                yAxis: {
+                    title: {
+                        text: 'Total expedientes al mes.'
+                    }
+
+                },
+                legend: {
+                    enabled: false
+                },
+                plotOptions: {
+                    series: {
+                        borderWidth: 0,
+                        dataLabels: {
+                            enabled: true,
+                            format: '{point.y}'
+                        }
+                    }
+                },
+
+                tooltip: {
+                    headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                    pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y}</b> <br/>'
+                },
+
+                series: [
+                    {
+                        name: "Expedientes",
+                        colorByPoint: true,
+                        data: myArray_b
+                    }
+                ]
+            });
+
+            //-----------------------------------------------------------------------------------------------------Array para finalizados
+            var myArray = [];
+            var tri_b = [];
+
+            @foreach (var item in @ViewBag.FinalizadosGenero)
+            {
+
+                @:tri_b = ["@item.Genero", parseFloat(@item.Total), "@item.Genero" ];
+                @:myArray.push(tri_b);
+
+            }
+
+            Highcharts.chart('container', {
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: 'Expediente Finalizados'
+                },
+                subtitle: {
+                    text: 'Total de expedientes finalizados'
+                },
+                accessibility: {
+                    announceNewData: {
+                        enabled: true
+                    }
+                },
+                xAxis: {
+                    type: 'category'
+                },
+                yAxis: {
+                    title: {
+                        text: 'Total expedientes al mes.'
+                    }
+
+                },
+                legend: {
+                    enabled: false
+                },
+                plotOptions: {
+                    series: {
+                        borderWidth: 0,
+                        dataLabels: {
+                            enabled: true,
+                            format: '{point.y}'
+                        }
+                    }
+                },
+
+                tooltip: {
+                    headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+                    pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y}</b> <br/>'
+                },
+
+                series: [
+                    {
+                        name: "Expedientes",
+                        colorByPoint: true,
+                        data: myArray
+                    }
+                ]
+            });
+
+        </script>
+    }
+}
